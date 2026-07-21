@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBER_FANTASY_ENGINE v3.0</title>
+    <title>CYBER - RPG</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
@@ -291,7 +291,7 @@
 <body>
 
     <header>
-        <h1>CYBER_FANTASY</h1>
+        <h1>CYBER - RPG</h1>
         <div class="version">SYS_STATUS: MULTI-CHANNEL ONLINE // v3.0.0</div>
     </header>
 
@@ -300,7 +300,7 @@
             <label for="master-volume">MASTER_VOL:</label>
             <input type="range" id="master-volume" min="0" max="1" step="0.05" value="0.8" oninput="updateMasterVolume(this.value)">
         </div>
-        <button class="stop-all-btn" onclick="stopAllSounds()">[ EMERGENCIAL: MUTE ALL CHANNELS ]</button>
+        <button class="stop-all-btn" onclick="stopAllSounds()">[ MUTA TODOS OS SONS ]</button>
     </section>
 
     <!-- O Howler.js permite que múltiplas faixas toquem simultaneamente. 
@@ -309,7 +309,7 @@
         
         <!-- PAINEL 1: AMBIÊNCIAS -->
         <section class="panel fantasy">
-            <div class="panel-title">01 // WORLD_AMBIENCE</div>
+            <div class="panel-title">01 // Ambientação</div>
             <div class="sound-list">
                 
                 <div class="track-row">
@@ -349,7 +349,7 @@
 
         <!-- PAINEL 2: MÚSICAS -->
         <section class="panel music">
-            <div class="panel-title">02 // BGM_TRACKS</div>
+            <div class="panel-title">02 // Músicas Medievais</div>
             <div class="sound-list">
 
                 <div class="track-row">
@@ -389,7 +389,7 @@
 
         <!-- PAINEL 3: SOUNDBOARD (SFX) -->
         <section class="panel">
-            <div class="panel-title">03 // COMBAT_MAGIC_ITEMS_SFX</div>
+            <div class="panel-title">03 // Combate // Mágias // Dinheiros</div>
             <div class="sfx-grid">
                 <!-- ESPADAS E COMBATE -->
                 <button class="sfx-btn" onclick="playSFX('sfxLuta')">SWORD_FIGHT</button>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER_FANTASY_ENGINE v3.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #05050a;
+            --panel-bg: #0d0d1a;
+            --cyan: #00f0ff;
+            --magenta: #ff0055;
+            --yellow: #fdee00;
+            --green: #00ff66;
+            --text-color: #e0e0ed;
+            --border-glow: 0 0 8px rgba(0, 240, 255, 0.4);
+            --magenta-glow: 0 0 8px rgba(255, 0, 85, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Rajdhani', sans-serif;
+            padding: 20px;
+            padding-top: 80px;
+            min-height: 100vh;
+            background-image: 
+                linear-gradient(rgba(18, 18, 36, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(18, 18, 36, 0.3) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        header {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-align: right;
+            border-right: 3px solid var(--cyan);
+            padding-right: 15px;
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--cyan);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+            letter-spacing: 2px;
+        }
+
+        .version {
+            font-size: 0.8rem;
+            color: var(--magenta);
+            text-shadow: 0 0 5px rgba(255, 0, 85, 0.5);
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .global-controls {
+            background: var(--panel-bg);
+            border: 1px solid var(--magenta);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            box-shadow: var(--magenta-glow);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .volume-control label {
+            color: var(--yellow);
+            font-weight: bold;
+            letter-spacing: 1px;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+
+        .volume-control input[type="range"] {
+            flex-grow: 1;
+            appearance: none;
+            background: #1a1a33;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .volume-control input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--magenta);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--magenta);
+        }
+
+        .stop-all-btn {
+            background: transparent;
+            border: 1px solid var(--magenta);
+            color: var(--magenta);
+            font-family: 'Orbitron', sans-serif;
+            padding: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stop-all-btn:hover, .stop-all-btn:active {
+            background: var(--magenta);
+            color: #000;
+            box-shadow: 0 0 15px var(--magenta);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (min-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--cyan);
+            border-radius: 4px;
+            padding: 15px;
+            box-shadow: var(--border-glow);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1.1rem;
+            border-left: 3px solid var(--magenta);
+            padding-left: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .sound-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .track-row {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid #1a1a33;
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .track-name {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #a0a0c0;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .track-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            font-family: 'Orbitron', sans-serif;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .btn:hover, .btn:active {
+            background: var(--cyan);
+            color: #000;
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
+        .btn.playing {
+            background: var(--yellow);
+            border-color: var(--yellow);
+            color: #000;
+            box-shadow: 0 0 10px var(--yellow);
+        }
+
+        .sfx-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .sfx-btn {
+            background: rgba(255, 0, 85, 0.05);
+            border: 1px solid var(--magenta);
+            color: var(--text-color);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            font-weight: bold;
+            padding: 12px 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: center;
+            transition: all 0.1s ease;
+        }
+        
+        .sfx-btn.magic {
+            border-color: var(--cyan);
+            background: rgba(0, 240, 255, 0.05);
+        }
+
+        .sfx-btn.item {
+            border-color: var(--yellow);
+            background: rgba(253, 238, 0, 0.05);
+        }
+
+        .sfx-btn:active {
+            background: var(--magenta);
+            color: #000;
+            box-shadow: 0 0 15px var(--magenta);
+            transform: scale(0.98);
+        }
+        
+        .sfx-btn.magic:active { background: var(--cyan); box-shadow: 0 0 15px var(--cyan); }
+        .sfx-btn.item:active { background: var(--yellow); box-shadow: 0 0 15px var(--yellow); }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.8rem;
+            color: #4a4a66;
+            border-top: 1px solid #1a1a33;
+            padding-top: 15px;
+        }
+
+        .panel.fantasy { border-color: var(--yellow); box-shadow: 0 0 8px rgba(253, 238, 0, 0.2); }
+        .panel.fantasy .panel-title { color: var(--yellow); border-left-color: var(--cyan); }
+        .panel.music { border-color: var(--green); box-shadow: 0 0 8px rgba(0, 255, 102, 0.2); }
+        .panel.music .panel-title { color: var(--green); border-left-color: var(--magenta); }
+        
+        /* Ajustes Mobile */
+        @media (max-width: 600px) {
+            header { position: relative; right: auto; top: auto; text-align: center; border-right: none; border-bottom: 3px solid var(--cyan); padding-bottom: 10px; margin-bottom: 20px; }
+            body { padding-top: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>CYBER_FANTASY</h1>
+        <div class="version">SYS_STATUS: MULTI-CHANNEL ONLINE // v3.0.0</div>
+    </header>
+
+    <section class="global-controls">
+        <div class="volume-control">
+            <label for="master-volume">MASTER_VOL:</label>
+            <input type="range" id="master-volume" min="0" max="1" step="0.05" value="0.8" oninput="updateMasterVolume(this.value)">
+        </div>
+        <button class="stop-all-btn" onclick="stopAllSounds()">[ EMERGENCIAL: MUTE ALL CHANNELS ]</button>
+    </section>
+
+    <!-- O Howler.js permite que múltiplas faixas toquem simultaneamente. 
+         Você pode dar PLAY na Taverna e depois PLAY nas Moedas para mesclá-las perfeitamente. -->
+    <main class="dashboard">
+        
+        <!-- PAINEL 1: AMBIÊNCIAS -->
+        <section class="panel fantasy">
+            <div class="panel-title">01 // WORLD_AMBIENCE</div>
+            <div class="sound-list">
+                
+                <div class="track-row">
+                    <span class="track-name">placidplace-tavern-ambience-with-openfire</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-tavFogo" onclick="toggleLoop('tavFogo', 'TAV_FOGO')">PLAY TAV_FOGO</button>
+                        <input type="range" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('tavFogo', this.value)">
+                    </div>
+                </div>
+
+                <div class="track-row">
+                    <span class="track-name">freesound_community-tavern_ambience_inside_laughter</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-tavRisada" onclick="toggleLoop('tavRisada', 'TAV_RISADA')">PLAY TAV_RISADA</button>
+                        <input type="range" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('tavRisada', this.value)">
+                    </div>
+                </div>
+
+                <div class="track-row">
+                    <span class="track-name">freesound_community-medieval_village_atmosphere</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-vilaMed" onclick="toggleLoop('vilaMed', 'VILA_MED')">PLAY VILA_MED</button>
+                        <input type="range" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('vilaMed', this.value)">
+                    </div>
+                </div>
+
+                <div class="track-row">
+                    <span class="track-name">deuslower-medieval-ambient</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-ambMed" onclick="toggleLoop('ambMed', 'AMB_MED')">PLAY AMB_MED</button>
+                        <input type="range" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('ambMed', this.value)">
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PAINEL 2: MÚSICAS -->
+        <section class="panel music">
+            <div class="panel-title">02 // BGM_TRACKS</div>
+            <div class="sound-list">
+
+                <div class="track-row">
+                    <span class="track-name">tunetank-medieval-festive-music</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-musFest" onclick="toggleLoop('musFest', 'MUS_FESTIVA')">PLAY MUS_FESTIVA</button>
+                        <input type="range" min="0" max="1" step="0.05" value="0.4" oninput="updateVolume('musFest', this.value)">
+                    </div>
+                </div>
+
+                <div class="track-row">
+                    <span class="track-name">tunetank-medieval-happy-music</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-musHappy" onclick="toggleLoop('musHappy', 'MUS_HAPPY')">PLAY MUS_HAPPY</button>
+                        <input type="range" min="0" max="1" step="0.05" value="0.4" oninput="updateVolume('musHappy', this.value)">
+                    </div>
+                </div>
+
+                <div class="track-row">
+                    <span class="track-name">watermelon_beats-medieval-folk-music</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-musFolk" onclick="toggleLoop('musFolk', 'MUS_FOLK')">PLAY MUS_FOLK</button>
+                        <input type="range" min="0" max="1" step="0.05" value="0.4" oninput="updateVolume('musFolk', this.value)">
+                    </div>
+                </div>
+                
+                <div class="track-row">
+                    <span class="track-name">kaazoom-the-happy-whistler-30-sec-edit</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-musWhis" onclick="toggleLoop('musWhis', 'WHISTLER')">PLAY WHISTLER</button>
+                        <input type="range" min="0" max="1" step="0.05" value="0.4" oninput="updateVolume('musWhis', this.value)">
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PAINEL 3: SOUNDBOARD (SFX) -->
+        <section class="panel">
+            <div class="panel-title">03 // COMBAT_MAGIC_ITEMS_SFX</div>
+            <div class="sfx-grid">
+                <!-- ESPADAS E COMBATE -->
+                <button class="sfx-btn" onclick="playSFX('sfxLuta')">SWORD_FIGHT</button>
+                <button class="sfx-btn" onclick="playSFX('sfxArma')">ARMOR_IMPACT</button>
+                <button class="sfx-btn" onclick="playSFX('sfxChoque')">SWORD_CLASH</button>
+                
+                <!-- MAGIAS -->
+                <button class="sfx-btn magic" onclick="playSFX('sfxMagSpell1')">MAGIC_SPELL_1</button>
+                <button class="sfx-btn magic" onclick="playSFX('sfxMagSpell2')">MAGIC_SPELL_2</button>
+                <button class="sfx-btn magic" onclick="playSFX('sfxMagFogo')">FIRE_MAGIC</button>
+                <button class="sfx-btn magic" onclick="playSFX('sfxMagCura')">HEAL_MAGIC</button>
+                
+                <!-- ITENS E MOEDAS -->
+                <button class="sfx-btn item" onclick="playSFX('sfxMoedaClink')">COIN_CLINK</button>
+                <button class="sfx-btn item" onclick="playSFX('sfxMoedaSpin')">COIN_SPIN</button>
+                <button class="sfx-btn item" onclick="playSFX('sfxMoedaCom')">COINS_MANY</button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>MÚLTIPLOS CANAIS DE ÁUDIO ATIVOS // OS ÁUDIOS SE MESCLAM AUTOMATICAMENTE AO REPRODUZIR SIMULTANEAMENTE</p>
+    </footer>
+
+    <script>
+        // Mapeamento exato apontando para a pasta local ./audio/ dentro de rpgProject
+        const soundRepo = {
+            // AMBIÊNCIAS
+            tavFogo: new Howl({ src: ['./audio/placidplace-tavern-ambience-with-openfire-effect-no-loops-86151.mp3'], loop: true, volume: 0.5 }),
+            tavRisada: new Howl({ src: ['./audio/freesound_community-tavern_ambience_inside_laughter-73008.mp3'], loop: true, volume: 0.5 }),
+            vilaMed: new Howl({ src: ['./audio/freesound_community-medieval_village_atmosphere-79282.mp3'], loop: true, volume: 0.5 }),
+            ambMed: new Howl({ src: ['./audio/deuslower-medieval-ambient-236809.mp3'], loop: true, volume: 0.5 }),
+
+            // MÚSICAS
+            musFest: new Howl({ src: ['./audio/tunetank-medieval-festive-music-412772.mp3'], loop: true, volume: 0.4 }),
+            musHappy: new Howl({ src: ['./audio/tunetank-medieval-happy-music-412790.mp3'], loop: true, volume: 0.4 }),
+            musFolk: new Howl({ src: ['./audio/watermelon_beats-medieval-folk-music-505203.mp3'], loop: true, volume: 0.4 }),
+            musWhis: new Howl({ src: ['./audio/kaazoom-the-happy-whistler-30-sec-edit-532434.mp3'], loop: true, volume: 0.4 }),
+
+            // SFX - ESPADAS / LUTA
+            sfxLuta: new Howl({ src: ['./audio/dragon-studio-sword-fight-393849.mp3'], volume: 0.8 }),
+            sfxArma: new Howl({ src: ['./audio/dragon-studio-armor-impact-from-sword-393843.mp3'], volume: 0.8 }),
+            sfxChoque: new Howl({ src: ['./audio/u_fe12rqkbth-sword-clash-241729.mp3'], volume: 0.8 }),
+
+            // SFX - MAGIAS
+            sfxMagSpell1: new Howl({ src: ['./audio/freesounds123-magic-spell-333896.mp3'], volume: 0.7 }),
+            sfxMagSpell2: new Howl({ src: ['./audio/universfield-magic-spell-278824.mp3'], volume: 0.7 }),
+            sfxMagFogo: new Howl({ src: ['./audio/yodguard-fire-magic-5-378639.mp3'], volume: 0.7 }),
+            sfxMagCura: new Howl({ src: ['./audio/yodguard-healing-magic-4-378668.mp3'], volume: 0.7 }),
+
+            // SFX - MOEDAS (Você pode disparar essas dezenas de vezes enquanto a taverna toca)
+            sfxMoedaClink: new Howl({ src: ['./audio/dihumichi-coins-clinking-sound-410677.mp3'], volume: 0.9 }),
+            sfxMoedaSpin: new Howl({ src: ['./audio/universfield-spinning-coin-on-table-352448.mp3'], volume: 0.9 }),
+            sfxMoedaCom: new Howl({ src: ['./audio/freesound_community-coins27-36030.mp3'], volume: 0.9 })
+        };
+
+        // Agora o botão recebe o ID e o NOME dinâmico que vai aparecer no botão
+        function toggleLoop(id, name) {
+            const sound = soundRepo[id];
+            const btn = document.getElementById(`btn-${id}`);
+
+            if (sound.playing()) {
+                sound.fade(sound.volume(), 0, 300);
+                setTimeout(() => { sound.stop(); }, 300);
+                btn.innerText = `PLAY ${name}`;
+                btn.classList.remove("playing");
+            } else {
+                sound.play();
+                sound.fade(0, sound.volume(), 300);
+                btn.innerText = `STOP ${name}`;
+                btn.classList.add("playing");
+            }
+        }
+
+        function playSFX(id) {
+            // A mescla acontece aqui: a biblioteca Howler gerencia múltiplos canais.
+            // Acionar um SFX nunca interrompe a música ou a ambiência que já está rodando.
+            soundRepo[id].play();
+        }
+
+        function updateVolume(id, value) {
+            soundRepo[id].volume(parseFloat(value));
+        }
+
+        function updateMasterVolume(value) {
+            Howler.volume(parseFloat(value));
+        }
+
+        function stopAllSounds() {
+            Object.keys(soundRepo).forEach(key => {
+                const sound = soundRepo[key];
+                sound.stop();
+                
+                const btn = document.getElementById(`btn-${key}`);
+                if(btn) {
+                    // Extrai o nome do botão que estava no estado STOP para voltar para PLAY
+                    const namePart = btn.innerText.replace('STOP ', '').replace('PLAY ', '');
+                    btn.innerText = `PLAY ${namePart}`;
+                    btn.classList.remove("playing");
+                }
+            });
+        }
+    </script>
+</body>
+</html>

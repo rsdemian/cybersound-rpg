@@ -4,9 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CYBER - RPG</title>
+    <!-- Fontes Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Biblioteca FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Motor de Áudio -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
     <style>
         :root {
@@ -16,6 +22,8 @@
             --magenta: #ff0055;
             --yellow: #fdee00;
             --green: #00ff66;
+            --purple: #b82bf2;
+            --orange: #ff8c00;
             --text-color: #e0e0ed;
             --border-glow: 0 0 8px rgba(0, 240, 255, 0.4);
             --magenta-glow: 0 0 8px rgba(255, 0, 85, 0.4);
@@ -57,6 +65,10 @@
             color: var(--cyan);
             text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
             letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
         }
 
         .version {
@@ -79,7 +91,7 @@
             gap: 10px;
         }
 
-        .volume-control {
+        .volume-control, .pitch-control {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -87,15 +99,24 @@
             width: 100%;
         }
 
-        .volume-control label {
+        .volume-control label, .pitch-control label {
             color: var(--yellow);
             font-weight: bold;
             letter-spacing: 1px;
             font-size: 1rem;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .volume-control input[type="range"] {
+        .volume-icon {
+            color: var(--magenta);
+            font-size: 1.2rem;
+            text-shadow: var(--magenta-glow);
+        }
+
+        input[type="range"] {
             flex-grow: 1;
             appearance: none;
             background: #1a1a33;
@@ -104,7 +125,7 @@
             outline: none;
         }
 
-        .volume-control input[type="range"]::-webkit-slider-thumb {
+        input[type="range"]::-webkit-slider-thumb {
             appearance: none;
             width: 16px;
             height: 16px;
@@ -125,6 +146,10 @@
             transition: all 0.2s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
         .stop-all-btn:hover, .stop-all-btn:active {
@@ -133,17 +158,44 @@
             box-shadow: 0 0 15px var(--magenta);
         }
 
-        .dashboard {
+        /* MACROS / CENAS */
+        .scenes-container {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-            align-items: start;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
         }
 
-        @media (min-width: 900px) {
-            .dashboard {
-                grid-template-columns: 1fr 1fr 1fr;
-            }
+        .scene-btn {
+            background: rgba(0, 240, 255, 0.05);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            font-family: 'Orbitron', sans-serif;
+            padding: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border-radius: 4px;
+        }
+
+        .scene-btn:hover, .scene-btn:active {
+            background: var(--cyan);
+            color: #000;
+            box-shadow: 0 0 15px var(--cyan);
+            transform: translateY(-2px);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            align-items: start;
         }
 
         .panel {
@@ -155,7 +207,13 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            max-height: 800px;
+            overflow-y: auto;
         }
+
+        .panel::-webkit-scrollbar { width: 6px; }
+        .panel::-webkit-scrollbar-track { background: #05050a; }
+        .panel::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 3px; }
 
         .panel-title {
             font-family: 'Orbitron', sans-serif;
@@ -166,6 +224,14 @@
             letter-spacing: 1px;
             text-transform: uppercase;
             margin-bottom: 10px;
+            position: sticky;
+            top: 0;
+            background: var(--panel-bg);
+            z-index: 2;
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .sound-list {
@@ -210,80 +276,56 @@
             border-radius: 2px;
             transition: all 0.2s ease;
             white-space: nowrap;
-            min-width: 120px;
+            min-width: 140px;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
-        .btn:hover, .btn:active {
-            background: var(--cyan);
-            color: #000;
-            box-shadow: 0 0 10px var(--cyan);
-        }
+        .btn:hover, .btn:active { background: var(--cyan); color: #000; box-shadow: 0 0 10px var(--cyan); }
+        .btn.playing { background: var(--yellow); border-color: var(--yellow); color: #000; box-shadow: 0 0 10px var(--yellow); }
 
-        .btn.playing {
-            background: var(--yellow);
-            border-color: var(--yellow);
-            color: #000;
-            box-shadow: 0 0 10px var(--yellow);
-        }
-
-        .sfx-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .sfx-btn {
-            background: rgba(255, 0, 85, 0.05);
-            border: 1px solid var(--magenta);
-            color: var(--text-color);
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 0.9rem;
-            font-weight: bold;
-            padding: 12px 8px;
-            cursor: pointer;
-            border-radius: 4px;
-            text-align: center;
-            transition: all 0.1s ease;
-        }
-        
-        .sfx-btn.magic {
-            border-color: var(--cyan);
-            background: rgba(0, 240, 255, 0.05);
-        }
-
-        .sfx-btn.item {
-            border-color: var(--yellow);
-            background: rgba(253, 238, 0, 0.05);
-        }
-
-        .sfx-btn:active {
-            background: var(--magenta);
-            color: #000;
-            box-shadow: 0 0 15px var(--magenta);
-            transform: scale(0.98);
-        }
-        
-        .sfx-btn.magic:active { background: var(--cyan); box-shadow: 0 0 15px var(--cyan); }
-        .sfx-btn.item:active { background: var(--yellow); box-shadow: 0 0 15px var(--yellow); }
-
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            font-size: 0.8rem;
-            color: #4a4a66;
-            border-top: 1px solid #1a1a33;
-            padding-top: 15px;
-        }
-
+        /* Cores Específicas dos Painéis */
         .panel.fantasy { border-color: var(--yellow); box-shadow: 0 0 8px rgba(253, 238, 0, 0.2); }
         .panel.fantasy .panel-title { color: var(--yellow); border-left-color: var(--cyan); }
+        
         .panel.music { border-color: var(--green); box-shadow: 0 0 8px rgba(0, 255, 102, 0.2); }
         .panel.music .panel-title { color: var(--green); border-left-color: var(--magenta); }
         
-        /* Ajustes Mobile */
+        .panel.nature { border-color: var(--purple); box-shadow: 0 0 8px rgba(184, 43, 242, 0.2); }
+        .panel.nature .panel-title { color: var(--purple); border-left-color: var(--cyan); }
+        
+        .panel.easter { border-color: var(--orange); box-shadow: 0 0 8px rgba(255, 140, 0, 0.2); background: #1a0e00; }
+        .panel.easter .panel-title { color: var(--orange); border-left-color: var(--yellow); background: #1a0e00; }
+        .panel.easter .btn { border-color: var(--orange); color: var(--orange); }
+        .panel.easter .btn:hover { background: var(--orange); color: #000; box-shadow: 0 0 10px var(--orange); }
+        .panel.easter .btn.playing { background: var(--magenta); border-color: var(--magenta); color: #fff; box-shadow: 0 0 10px var(--magenta); }
+
+        .pitch-container {
+            background: rgba(0, 240, 255, 0.05);
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px dashed var(--cyan);
+            margin-bottom: 10px;
+        }
+
+        /* Rodapé com Dados */
+        footer {
+            text-align: center; margin-top: 50px; font-size: 0.8rem; color: #4a4a66; border-top: 1px solid #1a1a33; padding-top: 25px; padding-bottom: 25px; overflow: hidden; position: relative;
+        }
+        .dice-container { display: flex; justify-content: center; gap: 30px; margin-top: 15px; }
+        @keyframes tumble { 0% { transform: translateY(0) rotate(0deg); } 25% { transform: translateY(-10px) rotate(90deg); } 50% { transform: translateY(0) rotate(180deg); } 75% { transform: translateY(-10px) rotate(270deg); } 100% { transform: translateY(0) rotate(360deg); } }
+        .animated-dice { font-size: 2rem; animation: tumble 3s infinite linear; }
+        .d-cyan { color: var(--cyan); text-shadow: 0 0 10px rgba(0, 240, 255, 0.6); animation-delay: 0s; }
+        .d-magenta { color: var(--magenta); text-shadow: 0 0 10px rgba(255, 0, 85, 0.6); animation-delay: 0.5s; font-size: 1.7rem; }
+        .d-yellow { color: var(--yellow); text-shadow: 0 0 10px rgba(253, 238, 0, 0.6); animation-delay: 1s; font-size: 2.2rem; }
+        .d-green { color: var(--green); text-shadow: 0 0 10px rgba(0, 255, 102, 0.6); animation-delay: 1.5s; }
+
         @media (max-width: 600px) {
             header { position: relative; right: auto; top: auto; text-align: center; border-right: none; border-bottom: 3px solid var(--cyan); padding-bottom: 10px; margin-bottom: 20px; }
+            h1 { justify-content: center; }
             body { padding-top: 20px; }
         }
     </style>
@@ -291,56 +333,73 @@
 <body>
 
     <header>
-        <h1>CYBER - RPG</h1>
-        <div class="version">SYS_STATUS: MULTI-CHANNEL ONLINE // v3.0.0</div>
+        <h1><i class="fas fa-dice-d20"></i> CYBER - RPG</h1>
+        <div class="version">SYS_STATUS: MULTI-CHANNEL ONLINE // v5.0.0</div>
     </header>
 
     <section class="global-controls">
         <div class="volume-control">
-            <label for="master-volume">MASTER_VOL:</label>
+            <label for="master-volume"><i class="fas fa-dice-d6 volume-icon"></i> MASTER_VOL:</label>
             <input type="range" id="master-volume" min="0" max="1" step="0.05" value="0.8" oninput="updateMasterVolume(this.value)">
         </div>
-        <button class="stop-all-btn" onclick="stopAllSounds()">[ MUTA TODOS OS SONS ]</button>
+        <button class="stop-all-btn" onclick="stopAllSounds()">
+            <i class="fas fa-skull"></i> [ MUTA TODOS OS SONS ] <i class="fas fa-skull"></i>
+        </button>
     </section>
 
-    <!-- O Howler.js permite que múltiplas faixas toquem simultaneamente. 
-         Você pode dar PLAY na Taverna e depois PLAY nas Moedas para mesclá-las perfeitamente. -->
+    <!-- SISTEMA DE CENAS (MACROS) -->
+    <section class="scenes-container">
+        <button class="scene-btn" onclick="triggerScene('pousada')">
+            <i class="fas fa-beer"></i> Cena: Pousada à Noite
+        </button>
+        <button class="scene-btn" style="border-color: var(--magenta); color: var(--magenta);" onclick="triggerScene('batalha')">
+            <i class="fas fa-swords"></i> Cena: Emboscada!
+        </button>
+        <button class="scene-btn" style="border-color: var(--purple); color: var(--purple);" onclick="triggerScene('dungeon')">
+            <i class="fas fa-dungeon"></i> Cena: A Masmorra
+        </button>
+    </section>
+
     <main class="dashboard">
         
         <!-- PAINEL 1: AMBIÊNCIAS -->
         <section class="panel fantasy">
-            <div class="panel-title">01 // Ambientação</div>
+            <div class="panel-title"><i class="fas fa-dice-d20"></i> 01 // Tavernas & Vilas</div>
             <div class="sound-list">
                 
                 <div class="track-row">
                     <span class="track-name">placidplace-tavern-ambience-with-openfire</span>
                     <div class="track-actions">
-                        <button class="btn" id="btn-tavFogo" onclick="toggleLoop('tavFogo', 'TAV_FOGO')">PLAY TAV_FOGO</button>
-                        <input type="range" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('tavFogo', this.value)">
+                        <button class="btn" id="btn-tavFogo" onclick="toggleLoop('tavFogo', 'TAV_FOGO')"><i class="fas fa-dice-d20"></i> PLAY TAV_FOGO</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--yellow)"></i>
+                        <input type="range" id="slider-tavFogo" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('tavFogo', this.value)">
                     </div>
                 </div>
 
                 <div class="track-row">
                     <span class="track-name">freesound_community-tavern_ambience_inside_laughter</span>
                     <div class="track-actions">
-                        <button class="btn" id="btn-tavRisada" onclick="toggleLoop('tavRisada', 'TAV_RISADA')">PLAY TAV_RISADA</button>
-                        <input type="range" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('tavRisada', this.value)">
+                        <button class="btn" id="btn-tavRisada" onclick="toggleLoop('tavRisada', 'TAV_RISADA')"><i class="fas fa-dice-d20"></i> PLAY TAV_RISADA</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--yellow)"></i>
+                        <input type="range" id="slider-tavRisada" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('tavRisada', this.value)">
                     </div>
                 </div>
 
                 <div class="track-row">
                     <span class="track-name">freesound_community-medieval_village_atmosphere</span>
                     <div class="track-actions">
-                        <button class="btn" id="btn-vilaMed" onclick="toggleLoop('vilaMed', 'VILA_MED')">PLAY VILA_MED</button>
-                        <input type="range" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('vilaMed', this.value)">
+                        <button class="btn" id="btn-vilaMed" onclick="toggleLoop('vilaMed', 'VILA_MED')"><i class="fas fa-dice-d20"></i> PLAY VILA_MED</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--yellow)"></i>
+                        <input type="range" id="slider-vilaMed" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('vilaMed', this.value)">
                     </div>
                 </div>
 
                 <div class="track-row">
                     <span class="track-name">deuslower-medieval-ambient</span>
                     <div class="track-actions">
-                        <button class="btn" id="btn-ambMed" onclick="toggleLoop('ambMed', 'AMB_MED')">PLAY AMB_MED</button>
-                        <input type="range" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('ambMed', this.value)">
+                        <button class="btn" id="btn-ambMed" onclick="toggleLoop('ambMed', 'AMB_MED')"><i class="fas fa-dice-d20"></i> PLAY AMB_MED</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--yellow)"></i>
+                        <input type="range" id="slider-ambMed" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('ambMed', this.value)">
                     </div>
                 </div>
 
@@ -349,38 +408,42 @@
 
         <!-- PAINEL 2: MÚSICAS -->
         <section class="panel music">
-            <div class="panel-title">02 // Músicas Medievais</div>
+            <div class="panel-title"><i class="fas fa-dice-d20"></i> 02 // Músicas Medievais</div>
             <div class="sound-list">
 
                 <div class="track-row">
                     <span class="track-name">tunetank-medieval-festive-music</span>
                     <div class="track-actions">
-                        <button class="btn" id="btn-musFest" onclick="toggleLoop('musFest', 'MUS_FESTIVA')">PLAY MUS_FESTIVA</button>
-                        <input type="range" min="0" max="1" step="0.05" value="0.4" oninput="updateVolume('musFest', this.value)">
+                        <button class="btn" id="btn-musFest" onclick="toggleLoop('musFest', 'MUS_FESTIVA')"><i class="fas fa-dice-d20"></i> PLAY MUS_FESTIVA</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--green)"></i>
+                        <input type="range" id="slider-musFest" min="0" max="1" step="0.05" value="0.4" oninput="updateVolume('musFest', this.value)">
                     </div>
                 </div>
 
                 <div class="track-row">
                     <span class="track-name">tunetank-medieval-happy-music</span>
                     <div class="track-actions">
-                        <button class="btn" id="btn-musHappy" onclick="toggleLoop('musHappy', 'MUS_HAPPY')">PLAY MUS_HAPPY</button>
-                        <input type="range" min="0" max="1" step="0.05" value="0.4" oninput="updateVolume('musHappy', this.value)">
+                        <button class="btn" id="btn-musHappy" onclick="toggleLoop('musHappy', 'MUS_HAPPY')"><i class="fas fa-dice-d20"></i> PLAY MUS_HAPPY</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--green)"></i>
+                        <input type="range" id="slider-musHappy" min="0" max="1" step="0.05" value="0.4" oninput="updateVolume('musHappy', this.value)">
                     </div>
                 </div>
 
                 <div class="track-row">
                     <span class="track-name">watermelon_beats-medieval-folk-music</span>
                     <div class="track-actions">
-                        <button class="btn" id="btn-musFolk" onclick="toggleLoop('musFolk', 'MUS_FOLK')">PLAY MUS_FOLK</button>
-                        <input type="range" min="0" max="1" step="0.05" value="0.4" oninput="updateVolume('musFolk', this.value)">
+                        <button class="btn" id="btn-musFolk" onclick="toggleLoop('musFolk', 'MUS_FOLK')"><i class="fas fa-dice-d20"></i> PLAY MUS_FOLK</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--green)"></i>
+                        <input type="range" id="slider-musFolk" min="0" max="1" step="0.05" value="0.4" oninput="updateVolume('musFolk', this.value)">
                     </div>
                 </div>
                 
                 <div class="track-row">
                     <span class="track-name">kaazoom-the-happy-whistler-30-sec-edit</span>
                     <div class="track-actions">
-                        <button class="btn" id="btn-musWhis" onclick="toggleLoop('musWhis', 'WHISTLER')">PLAY WHISTLER</button>
-                        <input type="range" min="0" max="1" step="0.05" value="0.4" oninput="updateVolume('musWhis', this.value)">
+                        <button class="btn" id="btn-musWhis" onclick="toggleLoop('musWhis', 'WHISTLER')"><i class="fas fa-dice-d20"></i> PLAY WHISTLER</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--green)"></i>
+                        <input type="range" id="slider-musWhis" min="0" max="1" step="0.05" value="0.4" oninput="updateVolume('musWhis', this.value)">
                     </div>
                 </div>
 
@@ -389,86 +452,207 @@
 
         <!-- PAINEL 3: SOUNDBOARD (SFX) -->
         <section class="panel">
-            <div class="panel-title">03 // Combate // Mágias // Dinheiros</div>
-            <div class="sfx-grid">
-                <!-- ESPADAS E COMBATE -->
-                <button class="sfx-btn" onclick="playSFX('sfxLuta')">SWORD_FIGHT</button>
-                <button class="sfx-btn" onclick="playSFX('sfxArma')">ARMOR_IMPACT</button>
-                <button class="sfx-btn" onclick="playSFX('sfxChoque')">SWORD_CLASH</button>
+            <div class="panel-title">
+                <span><i class="fas fa-dice-d20"></i> 03 // Combate, Magia & Loot</span>
+            </div>
+            
+            <!-- CONTROLE DE PITCH EXCLUSIVO PARA SFX -->
+            <div class="pitch-container">
+                <div class="pitch-control">
+                    <label for="sfx-pitch"><i class="fas fa-wave-square" style="color:var(--cyan)"></i> SFX RATE: <span id="pitch-display">1x</span></label>
+                    <input type="range" id="sfx-pitch" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateSfxPitch(this.value)">
+                </div>
+            </div>
+
+            <div class="sound-list">
                 
-                <!-- MAGIAS -->
-                <button class="sfx-btn magic" onclick="playSFX('sfxMagSpell1')">MAGIC_SPELL_1</button>
-                <button class="sfx-btn magic" onclick="playSFX('sfxMagSpell2')">MAGIC_SPELL_2</button>
-                <button class="sfx-btn magic" onclick="playSFX('sfxMagFogo')">FIRE_MAGIC</button>
-                <button class="sfx-btn magic" onclick="playSFX('sfxMagCura')">HEAL_MAGIC</button>
+                <div class="track-row">
+                    <span class="track-name">dragon-studio-sword-fight</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-sfxLuta" onclick="toggleLoop('sfxLuta', 'SWORD_FIGHT')"><i class="fas fa-dice-d20"></i> PLAY SWORD_FIGHT</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--cyan)"></i>
+                        <input type="range" id="slider-sfxLuta" min="0" max="1" step="0.05" value="0.8" oninput="updateVolume('sfxLuta', this.value)">
+                    </div>
+                </div>
+
+                <div class="track-row">
+                    <span class="track-name">dragon-studio-armor-impact-from-sword</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-sfxArma" onclick="toggleLoop('sfxArma', 'ARMOR_IMPACT')"><i class="fas fa-dice-d20"></i> PLAY ARMOR_IMPACT</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--cyan)"></i>
+                        <input type="range" id="slider-sfxArma" min="0" max="1" step="0.05" value="0.8" oninput="updateVolume('sfxArma', this.value)">
+                    </div>
+                </div>
+
+                <div class="track-row">
+                    <span class="track-name">u_fe12rqkbth-sword-clash</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-sfxChoque" onclick="toggleLoop('sfxChoque', 'SWORD_CLASH')"><i class="fas fa-dice-d20"></i> PLAY SWORD_CLASH</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--cyan)"></i>
+                        <input type="range" id="slider-sfxChoque" min="0" max="1" step="0.05" value="0.8" oninput="updateVolume('sfxChoque', this.value)">
+                    </div>
+                </div>
                 
-                <!-- ITENS E MOEDAS -->
-                <button class="sfx-btn item" onclick="playSFX('sfxMoedaClink')">COIN_CLINK</button>
-                <button class="sfx-btn item" onclick="playSFX('sfxMoedaSpin')">COIN_SPIN</button>
-                <button class="sfx-btn item" onclick="playSFX('sfxMoedaCom')">COINS_MANY</button>
+                <div class="track-row">
+                    <span class="track-name">yodguard-fire-magic-5</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-sfxMagFogo" onclick="toggleLoop('sfxMagFogo', 'FIRE_MAGIC')"><i class="fas fa-dice-d20"></i> PLAY FIRE_MAGIC</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--cyan)"></i>
+                        <input type="range" id="slider-sfxMagFogo" min="0" max="1" step="0.05" value="0.7" oninput="updateVolume('sfxMagFogo', this.value)">
+                    </div>
+                </div>
+
+                <div class="track-row">
+                    <span class="track-name">dihumichi-coins-clinking-sound</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-sfxMoedaClink" onclick="toggleLoop('sfxMoedaClink', 'COIN_CLINK')"><i class="fas fa-dice-d20"></i> PLAY COIN_CLINK</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--cyan)"></i>
+                        <input type="range" id="slider-sfxMoedaClink" min="0" max="1" step="0.05" value="0.9" oninput="updateVolume('sfxMoedaClink', this.value)">
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PAINEL 4: EXPLORAÇÃO E MASMORRAS -->
+        <section class="panel nature">
+            <div class="panel-title"><i class="fas fa-dice-d20"></i> 04 // Exploração & Masmorras</div>
+            <div class="sound-list">
+                
+                <div class="track-row">
+                    <span class="track-name">floresta.mp3</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-expFloresta" onclick="toggleLoop('expFloresta', 'FLORESTA')"><i class="fas fa-dice-d20"></i> PLAY FLORESTA</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--purple)"></i>
+                        <input type="range" id="slider-expFloresta" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('expFloresta', this.value)">
+                    </div>
+                </div>
+
+                <div class="track-row">
+                    <span class="track-name">dungeon.mp3</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-expDungeon" onclick="toggleLoop('expDungeon', 'DUNGEON_1')"><i class="fas fa-dice-d20"></i> PLAY DUNGEON_1</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--purple)"></i>
+                        <input type="range" id="slider-expDungeon" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('expDungeon', this.value)">
+                    </div>
+                </div>
+
+                <div class="track-row">
+                    <span class="track-name">dungeon1.mp3</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-expDungeon1" onclick="toggleLoop('expDungeon1', 'DUNGEON_2')"><i class="fas fa-dice-d20"></i> PLAY DUNGEON_2</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--purple)"></i>
+                        <input type="range" id="slider-expDungeon1" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('expDungeon1', this.value)">
+                    </div>
+                </div>
+
+                <div class="track-row">
+                    <span class="track-name">dungeon2.mp3</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-expDungeon2" onclick="toggleLoop('expDungeon2', 'DUNGEON_3')"><i class="fas fa-dice-d20"></i> PLAY DUNGEON_3</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--purple)"></i>
+                        <input type="range" id="slider-expDungeon2" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume('expDungeon2', this.value)">
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PAINEL 5: EASTER EGGS / GUILDA -->
+        <section class="panel easter">
+            <div class="panel-title"><i class="fas fa-crown"></i> 05 // EASTER EGGS</div>
+            <div class="sound-list">
+                
+                <div class="track-row">
+                    <span class="track-name">audio_risada_grupo.mp3 (Exemplo)</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-easter1" onclick="toggleLoop('easter1', 'RISADA_MEME')"><i class="fas fa-dice-d20"></i> PLAY RISADA_MEME</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--orange)"></i>
+                        <input type="range" id="slider-easter1" min="0" max="1" step="0.05" value="0.8" oninput="updateVolume('easter1', this.value)">
+                    </div>
+                </div>
+
+                <div class="track-row">
+                    <span class="track-name">falha_critica_xbox.mp3 (Exemplo)</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-easter2" onclick="toggleLoop('easter2', 'FALHA_CRITICA')"><i class="fas fa-dice-d20"></i> PLAY FALHA_CRITICA</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--orange)"></i>
+                        <input type="range" id="slider-easter2" min="0" max="1" step="0.05" value="0.8" oninput="updateVolume('easter2', this.value)">
+                    </div>
+                </div>
+
+                <div class="track-row">
+                    <span class="track-name">bordao_classico.mp3 (Exemplo)</span>
+                    <div class="track-actions">
+                        <button class="btn" id="btn-easter3" onclick="toggleLoop('easter3', 'BORDAO_CLASSICO')"><i class="fas fa-dice-d20"></i> PLAY BORDAO_CLASSICO</button>
+                        <i class="fas fa-dice-d6 volume-icon" style="font-size:0.9rem; color:var(--orange)"></i>
+                        <input type="range" id="slider-easter3" min="0" max="1" step="0.05" value="0.8" oninput="updateVolume('easter3', this.value)">
+                    </div>
+                </div>
+
             </div>
         </section>
 
     </main>
 
     <footer>
-        <p>MÚLTIPLOS CANAIS DE ÁUDIO ATIVOS // OS ÁUDIOS SE MESCLAM AUTOMATICAMENTE AO REPRODUZIR SIMULTANEAMENTE</p>
+        <p>SISTEMA DE MACROS ATIVADO // TIME DILATION: ONLINE // MÚLTIPLOS CANAIS DE ÁUDIO</p>
+        <div class="dice-container">
+            <i class="fas fa-dice-d20 animated-dice d-cyan"></i>
+            <i class="fas fa-dice-d6 animated-dice d-magenta"></i>
+            <i class="fas fa-dice-d12 animated-dice d-yellow"></i>
+            <i class="fas fa-dice-d20 animated-dice d-green"></i>
+        </div>
     </footer>
 
     <script>
-        // Mapeamento exato apontando para a pasta local ./audio/ dentro de rpgProject
         const soundRepo = {
-            // AMBIÊNCIAS
             tavFogo: new Howl({ src: ['./audio/placidplace-tavern-ambience-with-openfire-effect-no-loops-86151.mp3'], loop: true, volume: 0.5 }),
             tavRisada: new Howl({ src: ['./audio/freesound_community-tavern_ambience_inside_laughter-73008.mp3'], loop: true, volume: 0.5 }),
             vilaMed: new Howl({ src: ['./audio/freesound_community-medieval_village_atmosphere-79282.mp3'], loop: true, volume: 0.5 }),
             ambMed: new Howl({ src: ['./audio/deuslower-medieval-ambient-236809.mp3'], loop: true, volume: 0.5 }),
 
-            // MÚSICAS
             musFest: new Howl({ src: ['./audio/tunetank-medieval-festive-music-412772.mp3'], loop: true, volume: 0.4 }),
             musHappy: new Howl({ src: ['./audio/tunetank-medieval-happy-music-412790.mp3'], loop: true, volume: 0.4 }),
             musFolk: new Howl({ src: ['./audio/watermelon_beats-medieval-folk-music-505203.mp3'], loop: true, volume: 0.4 }),
             musWhis: new Howl({ src: ['./audio/kaazoom-the-happy-whistler-30-sec-edit-532434.mp3'], loop: true, volume: 0.4 }),
 
-            // SFX - ESPADAS / LUTA
-            sfxLuta: new Howl({ src: ['./audio/dragon-studio-sword-fight-393849.mp3'], volume: 0.8 }),
-            sfxArma: new Howl({ src: ['./audio/dragon-studio-armor-impact-from-sword-393843.mp3'], volume: 0.8 }),
-            sfxChoque: new Howl({ src: ['./audio/u_fe12rqkbth-sword-clash-241729.mp3'], volume: 0.8 }),
+            sfxLuta: new Howl({ src: ['./audio/dragon-studio-sword-fight-393849.mp3'], volume: 0.8, loop: true }),
+            sfxArma: new Howl({ src: ['./audio/dragon-studio-armor-impact-from-sword-393843.mp3'], volume: 0.8, loop: true }),
+            sfxChoque: new Howl({ src: ['./audio/u_fe12rqkbth-sword-clash-241729.mp3'], volume: 0.8, loop: true }),
+            sfxMagFogo: new Howl({ src: ['./audio/yodguard-fire-magic-5-378639.mp3'], volume: 0.7, loop: true }),
+            sfxMoedaClink: new Howl({ src: ['./audio/dihumichi-coins-clinking-sound-410677.mp3'], volume: 0.9, loop: true }),
 
-            // SFX - MAGIAS
-            sfxMagSpell1: new Howl({ src: ['./audio/freesounds123-magic-spell-333896.mp3'], volume: 0.7 }),
-            sfxMagSpell2: new Howl({ src: ['./audio/universfield-magic-spell-278824.mp3'], volume: 0.7 }),
-            sfxMagFogo: new Howl({ src: ['./audio/yodguard-fire-magic-5-378639.mp3'], volume: 0.7 }),
-            sfxMagCura: new Howl({ src: ['./audio/yodguard-healing-magic-4-378668.mp3'], volume: 0.7 }),
+            expFloresta: new Howl({ src: ['./audio/floresta.mp3'], loop: true, volume: 0.5 }),
+            expDungeon: new Howl({ src: ['./audio/dungeon.mp3'], loop: true, volume: 0.5 }),
+            expDungeon1: new Howl({ src: ['./audio/dungeon1.mp3'], loop: true, volume: 0.5 }),
+            expDungeon2: new Howl({ src: ['./audio/dungeon2.mp3'], loop: true, volume: 0.5 }),
 
-            // SFX - MOEDAS (Você pode disparar essas dezenas de vezes enquanto a taverna toca)
-            sfxMoedaClink: new Howl({ src: ['./audio/dihumichi-coins-clinking-sound-410677.mp3'], volume: 0.9 }),
-            sfxMoedaSpin: new Howl({ src: ['./audio/universfield-spinning-coin-on-table-352448.mp3'], volume: 0.9 }),
-            sfxMoedaCom: new Howl({ src: ['./audio/freesound_community-coins27-36030.mp3'], volume: 0.9 })
+            // Substitua os caminhos abaixo pelos áudios reais da sua guilda quando os tiver
+            easter1: new Howl({ src: ['./audio/placeholder_risada.mp3'], loop: true, volume: 0.8 }),
+            easter2: new Howl({ src: ['./audio/placeholder_falha.mp3'], loop: true, volume: 0.8 }),
+            easter3: new Howl({ src: ['./audio/placeholder_bordao.mp3'], loop: true, volume: 0.8 })
         };
 
-        // Agora o botão recebe o ID e o NOME dinâmico que vai aparecer no botão
+        // Arrays de IDs para facilitar manipulação em lote
+        const sfxIds = ['sfxLuta', 'sfxArma', 'sfxChoque', 'sfxMagFogo', 'sfxMoedaClink'];
+
         function toggleLoop(id, name) {
             const sound = soundRepo[id];
             const btn = document.getElementById(`btn-${id}`);
+            const diceIcon = '<i class="fas fa-dice-d20"></i> '; 
 
             if (sound.playing()) {
                 sound.fade(sound.volume(), 0, 300);
                 setTimeout(() => { sound.stop(); }, 300);
-                btn.innerText = `PLAY ${name}`;
+                btn.innerHTML = `${diceIcon} PLAY ${name}`;
                 btn.classList.remove("playing");
             } else {
                 sound.play();
                 sound.fade(0, sound.volume(), 300);
-                btn.innerText = `STOP ${name}`;
+                btn.innerHTML = `${diceIcon} STOP ${name}`;
                 btn.classList.add("playing");
             }
-        }
-
-        function playSFX(id) {
-            // A mescla acontece aqui: a biblioteca Howler gerencia múltiplos canais.
-            // Acionar um SFX nunca interrompe a música ou a ambiência que já está rodando.
-            soundRepo[id].play();
         }
 
         function updateVolume(id, value) {
@@ -479,6 +663,15 @@
             Howler.volume(parseFloat(value));
         }
 
+        // SISTEMA DE ALTERAÇÃO DE PITCH (Frequência)
+        function updateSfxPitch(value) {
+            const numValue = parseFloat(value);
+            sfxIds.forEach(id => {
+                soundRepo[id].rate(numValue);
+            });
+            document.getElementById('pitch-display').innerText = numValue.toFixed(1) + 'x';
+        }
+
         function stopAllSounds() {
             Object.keys(soundRepo).forEach(key => {
                 const sound = soundRepo[key];
@@ -486,10 +679,58 @@
                 
                 const btn = document.getElementById(`btn-${key}`);
                 if(btn) {
-                    // Extrai o nome do botão que estava no estado STOP para voltar para PLAY
-                    const namePart = btn.innerText.replace('STOP ', '').replace('PLAY ', '');
-                    btn.innerText = `PLAY ${namePart}`;
+                    const namePart = btn.innerText.replace('STOP', '').replace('PLAY', '').trim();
+                    btn.innerHTML = `<i class="fas fa-dice-d20"></i> PLAY ${namePart}`;
                     btn.classList.remove("playing");
+                }
+            });
+        }
+
+        // SISTEMA DE CENAS (MACROS)
+        function triggerScene(sceneKey) {
+            stopAllSounds(); // Zera o palco
+
+            let tracksToPlay = [];
+
+            // Define os volumes e trilhas para cada cena
+            if(sceneKey === 'pousada') {
+                tracksToPlay = [
+                    { id: 'tavFogo', vol: 0.8 },
+                    { id: 'musFolk', vol: 0.3 },
+                    { id: 'tavRisada', vol: 0.4 }
+                ];
+            } else if(sceneKey === 'batalha') {
+                tracksToPlay = [
+                    { id: 'ambMed', vol: 0.6 },
+                    { id: 'musFest', vol: 0.8 },
+                    { id: 'sfxChoque', vol: 0.6 }
+                ];
+            } else if(sceneKey === 'dungeon') {
+                tracksToPlay = [
+                    { id: 'expDungeon', vol: 0.8 },
+                    { id: 'expDungeon1', vol: 0.5 },
+                    { id: 'tavFogo', vol: 0.2 } // Fogo baixinho como tocha
+                ];
+            }
+
+            // Dispara as trilhas configuradas e atualiza o visual da interface
+            tracksToPlay.forEach(track => {
+                const sound = soundRepo[track.id];
+                sound.volume(track.vol);
+                
+                // Atualiza o visual do slider correspondente
+                const slider = document.getElementById(`slider-${track.id}`);
+                if(slider) slider.value = track.vol;
+
+                // Toca o som
+                sound.play();
+                
+                // Atualiza o botão para estado STOP/Vermelho
+                const btn = document.getElementById(`btn-${track.id}`);
+                if(btn) {
+                    const namePart = btn.innerText.replace('PLAY', '').replace('STOP', '').trim();
+                    btn.innerHTML = `<i class="fas fa-dice-d20"></i> STOP ${namePart}`;
+                    btn.classList.add("playing");
                 }
             });
         }
